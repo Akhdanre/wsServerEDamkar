@@ -3,7 +3,7 @@ const server = require("http").createServer();
 const websocket = require("ws");
 const axios = require("axios");
 
-const apiUrl = "http://127.0.0.1:8000/api/";
+const apiUrl = "https://edamkar.wsjti.id/api/";
 const port = 3000;
 const wss = new websocket.Server({ noServer: true });
 const wss2 = new websocket.Server({ noServer: true });
