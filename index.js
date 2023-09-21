@@ -2,6 +2,7 @@ const { parse } = require("url");
 const server = require("http").createServer();
 const websocket = require("ws");
 const axios = require("axios");
+const uuid = require("uuid");
 
 const apiUrl = "https://edamkar.wsjti.id/api/";
 const port = 3000;
@@ -26,16 +27,36 @@ wss.on("connection", function onConnection(ws) {
   });
 });
 
+
+const rooms = {};
+
 wss2.on("connection", function onConnection(ws) {
-  console.log("some User connected on tracking");
+  var uuidUsr = uuid.v4();
   ws.on("message", function incomingData(data) {
     var json = JSON.parse(data);
+    var idRoom = json["id"];
+    var message = JSON.stringify(json)
     switch (json["command"]) {
-      case "Request":
-        onRequest(ws, json);
+      case "Join":
+        if (!rooms[idRoom]) rooms[idRoom] = {};
+        if (!rooms[idRoom][uuidUsr]) rooms[idRoom][uuidUsr] = ws;
         break;
-      case "Response":
-        onResponse(ws, json);
+      case "Message":
+        if (!rooms[idRoom] || !rooms[idRoom][uuidUsr]) {
+          console.log("unknown user want to send message");
+          ws.send(JSON.stringify({ error: "Anda harus bergabung dengan room sebelum mengirim pesan." }));
+          return;
+        }
+        Object.entries(rooms[idRoom]).forEach(([uuid, sock]) => {
+          if (uuid !== uuidUsr)
+            sock.send(message)
+        });
+        break;
+      case "leave":
+        if (!rooms[idRoom][uuid]) return;
+
+        if (Object.keys(rooms[idRoom]).length === 1) delete rooms[idRoom];
+        else delete rooms[idRoom][uuid];
         break;
     }
   });
@@ -93,20 +114,20 @@ async function onProses(ws) {
 }
 
 //on track
-function onRequest(ws, data) {
-  wss2.clients.forEach(function each(client) {
-    if (client !== ws && client.readyState === websocket.OPEN) {
-      client.send(JSON.stringify(data));
-    }
-  });
-}
-function onResponse(ws, data) {
-  wss2.clients.forEach(function each(client) {
-    if (client !== ws && client.readyState === websocket.OPEN) {
-      client.send(JSON.stringify(data));
-    }
-  });
-}
+// function onRequest(ws, data) {
+//   wss2.clients.forEach(function each(client) {
+//     if (client !== ws && client.readyState === websocket.OPEN) {
+//       client.send(JSON.stringify(data));
+//     }
+//   });
+// }
+// function onResponse(ws, data) {
+//   wss2.clients.forEach(function each(client) {
+//     if (client !== ws && client.readyState === websocket.OPEN) {
+//       client.send(JSON.stringify(data));
+//     }
+//   });
+// }
 
 server.listen(port, function () {
   console.log("listening on port " + port);
