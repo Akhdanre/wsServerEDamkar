@@ -40,10 +40,10 @@ wss2.on("connection", function onConnection(ws) {
       case "Join":
         if (!rooms[idRoom]) rooms[idRoom] = {};
         if (!rooms[idRoom][uuidUsr]) rooms[idRoom][uuidUsr] = ws;
+        ws.send(JSON.stringify({ condition: true, message: "Berhasil terhubung" }));
         break;
       case "Message":
         if (!rooms[idRoom] || !rooms[idRoom][uuidUsr]) {
-          console.log("unknown user want to send message");
           ws.send(JSON.stringify({ error: "Anda harus bergabung dengan room sebelum mengirim pesan." }));
           return;
         }
@@ -53,7 +53,6 @@ wss2.on("connection", function onConnection(ws) {
         });
         break;
       case "Leave":
-        console.log(uuidUsr);
 
         if (!rooms[idRoom][uuidUsr]) break;
 
@@ -61,7 +60,6 @@ wss2.on("connection", function onConnection(ws) {
         else delete rooms[idRoom][uuidUsr];
         break;
     }
-    console.log(rooms);
   });
 });
 
