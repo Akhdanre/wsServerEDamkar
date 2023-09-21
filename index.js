@@ -52,13 +52,16 @@ wss2.on("connection", function onConnection(ws) {
             sock.send(message)
         });
         break;
-      case "leave":
-        if (!rooms[idRoom][uuid]) return;
+      case "Leave":
+        console.log(uuidUsr);
+
+        if (!rooms[idRoom][uuidUsr]) break;
 
         if (Object.keys(rooms[idRoom]).length === 1) delete rooms[idRoom];
-        else delete rooms[idRoom][uuid];
+        else delete rooms[idRoom][uuidUsr];
         break;
     }
+    console.log(rooms);
   });
 });
 
