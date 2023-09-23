@@ -62,6 +62,7 @@ wss2.on("connection", function onConnection(ws) {
         break;
     }
   });
+
 });
 
 server.on("upgrade", function upgrade(request, socket, head) {
