@@ -60,6 +60,12 @@ wss2.on("connection", function onConnection(ws) {
 
         ws.send(JSON.stringify({ type: "leave", message: "leaveRoom" }))
         break;
+      case "Info":
+        ws.send(JSON.stringify({
+          type: "Info",
+          message: "Info room Tracking",
+          payload: rooms,
+        }))
     }
   });
 
