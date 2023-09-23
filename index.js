@@ -40,7 +40,7 @@ wss2.on("connection", function onConnection(ws) {
       case "Join":
         if (!rooms[idRoom]) rooms[idRoom] = {};
         if (!rooms[idRoom][uuidUsr]) rooms[idRoom][uuidUsr] = ws;
-        ws.send(JSON.stringify({ condition: true, message: "Berhasil terhubung" }));
+        ws.send(JSON.stringify(connect));
         break;
       case "Message":
         if (!rooms[idRoom] || !rooms[idRoom][uuidUsr]) {
@@ -53,11 +53,12 @@ wss2.on("connection", function onConnection(ws) {
         });
         break;
       case "Leave":
-
         if (!rooms[idRoom][uuidUsr]) break;
 
         if (Object.keys(rooms[idRoom]).length === 1) delete rooms[idRoom];
         else delete rooms[idRoom][uuidUsr];
+
+        ws.send(JSON.stringify({ type: "leave", message: "leaveRoom" }))
         break;
     }
   });
@@ -80,7 +81,7 @@ server.on("upgrade", function upgrade(request, socket, head) {
 
 //global on connection
 var connect = {
-  condition: true,
+  type: "connect",
   message: "connect",
   payload: {
     message: "connected successfully",
