@@ -23,6 +23,9 @@ wss.on("connection", function onConnection(ws) {
       case "proses":
         onProses(ws);
         break;
+      case "emeCall":
+        onEmeCall(ws, json["id"]);
+        break;
     }
   });
 });
@@ -113,6 +116,17 @@ function sendpelaporan(ws) {
 }
 
 async function onProses(ws) {
+  let response = await axios.get(apiUrl + "RLTDataPelaporan");
+  wss.clients.forEach(function each(client) {
+    if (client !== ws && client.readyState === websocket.OPEN) {
+      client.send(JSON.stringify(response.data));
+      ws.send(JSON.stringify(response.data));
+    }
+  });
+}
+
+
+async function onEmeCall(ws, id) {
   let response = await axios.get(apiUrl + "RLTDataPelaporan");
   wss.clients.forEach(function each(client) {
     if (client !== ws && client.readyState === websocket.OPEN) {
