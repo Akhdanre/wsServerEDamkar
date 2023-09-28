@@ -103,23 +103,25 @@ var connect = {
 function onGetData(ws) {
   axios.get(apiUrl + "RLTDataPelaporan")
     .then(response => {
-      response.data.payload.sort((a, b) => {
-        if (a.urgensi === "Emergency_Kebakaran" && b.urgensi !== "Emergency_Kebakaran") {
-          return -1;
-        } else if (a.urgensi !== "Emergency_Kebakaran" && b.urgensi === "Emergency_Kebakaran") {
-          return 1; 
-        } else {
-          return 0; 
-        }
-      });
-      const emergencyKebakaranData = response.data.payload.filter(item => item.urgensi === "Emergency_Kebakaran");
-      const nonEmergencyKebakaranData = response.data.payload.filter(item => item.urgensi !== "Emergency_Kebakaran");
+      if (response.data.payload && response.data.payload.length > 0) {
+        response.data.payload.sort((a, b) => {
+          if (a.urgensi === "Emergency_Kebakaran" && b.urgensi !== "Emergency_Kebakaran") {
+            return -1;
+          } else if (a.urgensi !== "Emergency_Kebakaran" && b.urgensi === "Emergency_Kebakaran") {
+            return 1;
+          } else {
+            return 0;
+          }
+        });
+        const emergencyKebakaranData = response.data.payload.filter(item => item.urgensi === "Emergency_Kebakaran");
+        const nonEmergencyKebakaranData = response.data.payload.filter(item => item.urgensi !== "Emergency_Kebakaran");
 
-      const sortedData = emergencyKebakaranData.concat(nonEmergencyKebakaranData);
-      ws.send(JSON.stringify(sortedData))
+        const sortedData = emergencyKebakaranData.concat(nonEmergencyKebakaranData);
+        response.data.payload = sortedData;
+      }
+      ws.send(JSON.stringify(response.data));
     })
     .catch(error => {
-      // Tangani kesalahan jika ada
       console.error("Error:", error);
     });
 }
