@@ -101,10 +101,31 @@ var connect = {
 //on Beranda code
 
 function onGetData(ws) {
-  axios
-    .get(apiUrl + "RLTDataPelaporan")
-    .then((resp) => ws.send(JSON.stringify(resp.data)));
+  axios.get(apiUrl + "RLTDataPelaporan")
+    .then(response => {
+      response.data.payload.sort((a, b) => {
+        if (a.urgensi === "Emergency_Kebakaran" && b.urgensi !== "Emergency_Kebakaran") {
+          return -1;
+        } else if (a.urgensi !== "Emergency_Kebakaran" && b.urgensi === "Emergency_Kebakaran") {
+          return 1; 
+        } else {
+          return 0; 
+        }
+      });
+      const emergencyKebakaranData = response.data.payload.filter(item => item.urgensi === "Emergency_Kebakaran");
+      const nonEmergencyKebakaranData = response.data.payload.filter(item => item.urgensi !== "Emergency_Kebakaran");
+
+      const sortedData = emergencyKebakaranData.concat(nonEmergencyKebakaranData);
+      ws.send(JSON.stringify(sortedData))
+    })
+    .catch(error => {
+      // Tangani kesalahan jika ada
+      console.error("Error:", error);
+    });
 }
+
+
+
 function sendpelaporan(ws) {
   wss.clients.forEach(function each(client) {
     if (client !== ws && client.readyState === websocket.OPEN) {
